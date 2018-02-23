@@ -18,7 +18,7 @@
 
 #include <iostream>
 
-#include "lidar/ibeo_network.h"
+#include "ibeo_driver/ibeo_network.h"
 
 namespace lidar {
 /**
