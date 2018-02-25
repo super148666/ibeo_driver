@@ -12,11 +12,9 @@
 
 #define SOCKET_FD connection->socketFD
 
-namespace lidar {
-
     static char ibeo_magic_word[] = {
-            static_cast<char>(0xAF), static_cast<char>(0xFE), static_cast<char>(0xC0),
-            static_cast<char>(
+            static_cast<uint8_t>(0xAF), static_cast<uint8_t>(0xFE), static_cast<uint8_t>(0xC0),
+            static_cast<uint8_t>(
                     0xC2)}; // The magic word to look for for beginning of message.
 
     int curScanDataSource = 0;   // Current scan data source/buffer.
@@ -26,7 +24,7 @@ namespace lidar {
     bool gotObject = false;
     bool gotScan = false;
 
-    bool verbose = false;
+    bool verbose = true;
 
     char byteIn = 0;
 
@@ -188,30 +186,37 @@ namespace lidar {
         while (!(gotObject == true &&
                  gotScan == true)) { // Scan until we have one of each set of data
             header = this->FindHeader();
-            switch (htons(header.data_type)) {
-                case 0x2202:
-                    if (verbose)
-                        ROS_INFO_STREAM("ibeo scanner: found scan data.");
-                    if (!Read_Scan_Data())
-                        return;
-                    break;
-                case 0x2221:
-                    if (verbose)
-                        ROS_INFO_STREAM("ibeo scanner: found object data.");
-                    if (!Read_Object_Data())
-                        return;
-                    break;
-                case 0x2030:
-                    if (verbose)
-                        ROS_INFO_STREAM("ibeo scanner: found error data.");
-                    if (!Read_Errors())
-                        return;
-                    break;
-                default:
-                    if (verbose)
-                        ROS_INFO_STREAM(
-                                "ibeo scanner: received unknown message with id ");
-            }
+            try {
+				switch (htons(header.data_type)) {
+					case 0x2202:
+						if (verbose)
+							ROS_INFO_STREAM("ibeo scanner: found scan data.");
+						if (!Read_Scan_Data())
+							return;
+						break;
+					case 0x2221:
+						if (verbose)
+							ROS_INFO_STREAM("ibeo scanner: found object data.");
+						if (!Read_Object_Data())
+							return;
+						break;
+					case 0x2030:
+						if (verbose)
+							ROS_INFO_STREAM("ibeo scanner: found error data.");
+						if (!Read_Errors())
+							return;
+						break;
+					default:
+						if (verbose)
+							ROS_INFO_STREAM(
+									"ibeo scanner: received unknown message with id ");
+						break;
+				}
+			}
+			catch (int e) {
+				ROS_INFO_STREAM("IBEO - caught error!");
+				return;
+			}
         }
         read(SOCKET_FD, NULL, 1000000);
     }
@@ -229,8 +234,10 @@ namespace lidar {
         int next_scan_source;
         int i;
 
-        next_scan_source = (this->curScanDataSource + 1) % 2;
+        next_scan_source = (curScanDataSource + 1) % 2;
         if (Recv(SCAN_HEADER.scan_number))
+            return false;
+        if (Recv(SCAN_HEADER.scanner_status))
             return false;
         if (Recv(SCAN_HEADER.sync_phase_offset))
             return false;
@@ -260,19 +267,23 @@ namespace lidar {
             return false;
         if (Recv(SCAN_HEADER.flags))
             return false;
-
-        laserscan.angle_min = ConvertTicktsToAngle(SCAN_HEADER.start_angle);
-        laserscan.angle_max = ConvertTicktsToAngle(SCAN_HEADER.stop_angle);
+//		ROS_INFO_STREAM("angle_min_raw:"<<SCAN_HEADER.start_angle);
+//		ROS_INFO_STREAM("angle_max_raw:"<<SCAN_HEADER.stop_angle);
+//        laserscan.angle_min = ConvertTicktsToAngle(SCAN_HEADER.start_angle);
+//        laserscan.angle_max = ConvertTicktsToAngle(SCAN_HEADER.stop_angle);
+        laserscan.angle_min = -50/180*M_PI;
+        laserscan.angle_max = 50/180*M_PI;
         laserscan.angle_increment = ConvertTicktsToAngle(1);
         if (verbose)
-            ROS_INFO_STREAM("ibeo scanner: reading " << SCAN_HEADER.scan_points
-                                                     << " points from ibeo.");
-        if (verbose)
-            ROS_INFO_STREAM("ibeo scanner: start angle " << SCAN_HEADER.start_angle
-                                                         << " degrees.");
-        if (verbose)
-            ROS_INFO_STREAM("ibeo scanner: stop angle " << SCAN_HEADER.stop_angle
-                                                        << " degrees.");
+        {
+			ROS_INFO_STREAM("ang tick per rev " << SCAN_HEADER.angle_ticks_per_rotation);
+			ROS_INFO_STREAM("scan status " << SCAN_HEADER.scanner_status);
+			ROS_INFO_STREAM("scan num " << SCAN_HEADER.scan_number);
+            ROS_INFO_STREAM("scan points " << SCAN_HEADER.scan_points);
+            ROS_INFO_STREAM("start angle " << SCAN_HEADER.start_angle);
+            ROS_INFO_STREAM("stop angle " << SCAN_HEADER.stop_angle);
+                                                     
+        }
 
         for (i = 0; i < SCAN_HEADER.scan_points; i++) {
             if (Recv(SCAN_POINTS.layer_echo))
@@ -287,7 +298,8 @@ namespace lidar {
                 return false;
             if (Recv(SCAN_POINTS.res))
                 return false;
-            laserscan.ranges.data()[SCAN_POINTS.horiz_angle] = SCAN_POINTS.radial_dist/100;
+            laserscan.ranges[SCAN_POINTS.horiz_angle] = SCAN_POINTS.radial_dist/100;
+            ROS_INFO_STREAM("ticks:"<<SCAN_POINTS.horiz_angle<<" dist:"<<SCAN_POINTS.radial_dist);
         }
 
         curScanDataSource = next_scan_source;
@@ -519,10 +531,9 @@ namespace lidar {
         return angle;
     }
 
-} // namespace lidar
 
 
-
+/*
 int main(int argc, char **argv) {
     ros::init(argc, argv, "ibeo_driver_node");
     ros::NodeHandle nh;
@@ -533,3 +544,4 @@ int main(int argc, char **argv) {
     ibeo.StopScanner();
     return 0;
 }
+*/

@@ -1,0 +1,25 @@
+Header header
+uint16 UNCLASSIFIED=0
+uint16 UNKOWN_SMALL=1
+uint16 UNKOWN_BIG=2
+uint16 PEDESTRIAN=3
+uint16 BIKE=4
+uint16 CAR=5
+uint16 TRUCK=6
+uint16 RESERVED=7
+
+uint32 id
+uint32 age
+uint32 prediction_age
+uint32 relative_timestamp
+ReferencePoint reference_point
+Point2D closest_point
+BoundingBox bounding_box
+ObjectBox object_box
+AbsoluteVelocity absolute_velocity
+Point2D relative_velocity
+uint16 classification
+uint32 classification_age
+uint32 classification_certainty
+uint32 number_of_contour_points
+Point2D[] contour_points

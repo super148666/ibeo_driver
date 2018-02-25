@@ -13,9 +13,13 @@ find_package(catkin REQUIRED COMPONENTS
         std_msgs
         sensor_msgs
         )
-
+set(Boost_LIBRARY_DIR "/usr/lib/aarch64-linux-gnu")
+set(BOOT_INCLUDEDIR "/usr/include/boost")
+set(Boost_INCLUDE_DIR "/usr/include")
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS system thread)
+find_package(gflags REQUIRED)
+find_package(glog REQUIRED)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -48,11 +52,22 @@ find_package(Boost REQUIRED COMPONENTS system thread)
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+add_message_files(
+  FILES
+  LidarMessage.msg
+  Point2D.msg
+  Size2D.msg
+  AbsoluteVelocity.msg
+  MountingPosition.msg
+  ReferencePoint.msg
+  BoundingBox.msg
+  ObjectBox.msg
+  ObjectData.msg
+  Object.msg
+  ScanPoint.msg
+  ScanData.msg
+  
+)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -69,10 +84,10 @@ find_package(Boost REQUIRED COMPONENTS system thread)
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -135,10 +150,20 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(
-        ${PROJECT_NAME}_node
-            src/ibeo.cpp
-            src/ibeo_network.cpp
+        ${PROJECT_NAME}_node_1
+	    src/main.cpp
+	    src/reader.cc
+	    src/parser.cc
+	    src/lidar_manager.cc
+
 )
+
+#add_executable(
+#        ${PROJECT_NAME}_node_2
+#	    src/main2.cpp
+#	    src/ibeo.cpp
+#	    src/ibeo_network.cpp
+#)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -152,10 +177,13 @@ add_executable(
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(
-        ${PROJECT_NAME}_node
+        ${PROJECT_NAME}_node_1
             ${catkin_LIBRARIES}
-            ${Boost_LIBRARIES}
+            boost_system boost_thread
+            gflags glog
         )
+        
+#target_link_libraries(${PROJECT_NAME}_node_2 ${catkin_LIBRARIES} boost_system boost_thread gflags glog )
 
 #############
 ## Install ##
@@ -173,7 +201,8 @@ target_link_libraries(
 
 ## Mark executables and/or libraries for installation
 install(TARGETS
-        ${PROJECT_NAME}_node
+        ${PROJECT_NAME}_node_1
+#        ${PROJECT_NAME}_node_2
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

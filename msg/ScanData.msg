@@ -1,0 +1,11 @@
+Header header
+uint32 scan_number
+uint32 sync_phase_offset
+uint64 start_time
+uint64 end_time
+uint32 angle_ticks_per_rotation
+int32 start_angle
+int32 end_angle
+MountingPosition mounting_position
+uint32 num_scan_points
+ScanPoint[] scan_points

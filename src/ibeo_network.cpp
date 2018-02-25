@@ -20,7 +20,6 @@
 
 #include "ibeo_driver/ibeo_network.h"
 
-namespace lidar {
 /**
  * Purpose: Creates a new instance of the Network object.
  * Inputs : None.
@@ -102,7 +101,5 @@ void IBEONetwork::Disconnect() {
   (void) shutdown(socketFD, SHUT_RDWR);
 
   close(socketFD);
-
-}
 
 }

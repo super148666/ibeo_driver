@@ -48,7 +48,6 @@
 
 #define LAYERS 4
 
-namespace lidar {
     class IBEONetwork;
 
 /**
@@ -57,11 +56,11 @@ namespace lidar {
  * Notes:   excludes the 4-byte magic word found at beginning of header.
  */
     struct IBEO_HEADER {
-        unsigned int size_prev_msg;
-        unsigned int size_cur_msg;
-        char res;
-        char dev_id;
-        unsigned short data_type;
+        uint32_t size_prev_msg;
+        uint32_t size_cur_msg;
+        uint8_t res;
+        uint8_t dev_id;
+        uint16_t data_type;
         uint64_t ntp_time;
     };
 
@@ -69,22 +68,22 @@ namespace lidar {
  * Purpose: data header for each scan.
  */
     struct SCAN_DATA_HEADER {
-        unsigned short scan_number;
-        unsigned short scanner_status;
-        unsigned short sync_phase_offset;
+        uint16_t scan_number;
+        uint16_t scanner_status;
+        uint16_t sync_phase_offset;
         uint64_t scan_start_time;
         uint64_t scan_stop_time;
-        unsigned short angle_ticks_per_rotation;
-        short start_angle;
-        short stop_angle;
-        unsigned short scan_points;
-        short mp_yaw;
-        short mp_pitch;
-        short mp_roll;
-        short mp_x;
-        short mp_y;
-        short mp_z;
-        unsigned short flags;
+        uint16_t angle_ticks_per_rotation;
+        int16_t start_angle;
+        int16_t stop_angle;
+        uint16_t scan_points;
+        int16_t mp_yaw;
+        int16_t mp_pitch;
+        int16_t mp_roll;
+        int16_t mp_x;
+        int16_t mp_y;
+        int16_t mp_z;
+        uint16_t flags;
     };
 
 /**
@@ -92,12 +91,12 @@ namespace lidar {
  */
 
     struct SCAN_DATA_POINT {
-        char layer_echo;
-        char flags;
-        short horiz_angle;
-        unsigned short radial_dist;
-        unsigned short echo_pulse_width;
-        unsigned short res;
+        uint8_t layer_echo;
+        uint8_t flags;
+        int16_t horiz_angle;
+        uint16_t radial_dist;
+        uint16_t echo_pulse_width;
+        uint16_t res;
     };
 
     struct SCAN_XY_DATA {
@@ -108,16 +107,16 @@ namespace lidar {
  * Purpose: structure to hold an x, y coordinate for a scan point.
  */
     struct POINT_2D {
-        short x;
-        short y;
+        int16_t x;
+        int16_t y;
     };
 
 /**
  * Purpose: structure to hold an x, y coordinate for a size.
  */
     struct SIZE_2D {
-        unsigned short x;
-        unsigned short y;
+        uint16_t x;
+        uint16_t y;
     };
 
 /**
@@ -125,33 +124,33 @@ namespace lidar {
  */
     struct OBJECT_DATA_HEADER {
         uint64_t scan_start_time;
-        unsigned short number_of_objects;
+        uint16_t number_of_objects;
     };
 
 /**
  * Purpose: data for each object found by the ibeo.
  */
     struct OBJECT_DATA {
-        unsigned short object_id;
-        unsigned short object_age;
-        unsigned short object_prediction_age;
-        unsigned short relative_timestamp;
+        uint16_t object_id;
+        uint16_t object_age;
+        uint16_t object_prediction_age;
+        uint16_t relative_timestamp;
         POINT_2D reference_point;
         POINT_2D reference_point_sigma;
         POINT_2D closest_point;
         POINT_2D bounding_box_center;
-        unsigned short bounding_box_width;
-        unsigned short bounding_box_length;
+        uint16_t bounding_box_width;
+        uint16_t bounding_box_length;
         POINT_2D object_box_center;
         SIZE_2D object_box_size;
-        short object_box_orientation;
+        int16_t object_box_orientation;
         POINT_2D absolute_velocity;
         SIZE_2D absolute_velocity_sigma;
         POINT_2D relative_velocity;
-        unsigned short classification;
-        unsigned short classification_age;
-        unsigned short classification_certainty;
-        unsigned short number_contour_points;
+        uint16_t classification;
+        uint16_t classification_age;
+        uint16_t classification_certainty;
+        uint16_t number_contour_points;
         POINT_2D contour_points[MAX_CONTOUR_POINTS];
     };
 
@@ -159,11 +158,11 @@ namespace lidar {
  * Purpose: holds the data relating to errors experienced by the ibeo.
  */
     struct ERROR_DATA {
-        unsigned short error_register_1;
-        unsigned short error_register_2;
-        unsigned short warning_register_1;
-        unsigned short warning_register_2;
-        char res[8];
+        uint16_t error_register_1;
+        uint16_t error_register_2;
+        uint16_t warning_register_1;
+        uint16_t warning_register_2;
+        uint8_t res[8];
     };
 
     class IBEO {
@@ -227,6 +226,5 @@ namespace lidar {
         void ProcessMessages();
     };
 
-}  // namespace lidar
 
 #endif  // CONTROL_SRC_IBEO_H_

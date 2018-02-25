@@ -9,8 +9,6 @@
 #ifndef CONTROL_SRC_IBEONETWORK_H_
 #define CONTROL_SRC_IBEONETWORK_H_
 
-namespace lidar {
-
 class IBEONetwork {
  public:
   int socketFD;
@@ -23,7 +21,5 @@ class IBEONetwork {
   void Disconnect();
   bool Connect(char * ip_addr, int port);
 };
-
-}
 
 #endif  // CONTROL_SRC_IBEONETWORK_H_
